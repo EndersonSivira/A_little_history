@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Nuestra Historia ASCII ❤️</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body {
+            background-color: #050505;
+            color: #00ff66;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 100vh;
+            padding: 15px 10px;
+            overflow: hidden;
+        }
+
+        /* Pantalla/Marco de la Consola */
+        #terminal {
+            width: 100%;
+            max-width: 500px;
+            height: 90vh;
+            background-color: #0a0a0a;
+            border: 2px solid #00ff66;
+            border-radius: 12px;
+            box-shadow: 0 0 20px rgba(0, 255, 102, 0.2);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 20px 15px;
+            position: relative;
+        }
+
+        /* Cuadro donde se cuenta la historia */
+        #story-box {
+            background: rgba(0, 20, 5, 0.8);
+            border: 1px solid #00aa44;
+            border-radius: 8px;
+            padding: 15px;
+            min-height: 110px;
+            font-size: 14px;
+            line-height: 1.5;
+            color: #ccffdd;
+            text-shadow: 0 0 4px rgba(0, 255, 102, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            transition: all 0.5s ease-in-out;
+        }
+
+        /* Escenario ASCII del Camino */
+        #scene {
+            font-family: 'Courier New', Courier, monospace;
+            white-space: pre;
+            font-size: 11px;
+            line-height: 1.15;
+            color: #00ff66;
+            text-shadow: 0 0 5px #00ff66;
+            text-align: center;
+            margin: 10px 0;
+            overflow-x: auto;
+        }
+
+        /* Resaltados de corazones o luces */
+        .glow {
+            color: #ff3366;
+            text-shadow: 0 0 8px #ff3366;
+        }
+
+        /* Botón de Control */
+        #controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        button {
+            background: #002200;
+            color: #00ff66;
+            border: 1px solid #00ff66;
+            padding: 12px 25px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0, 255, 102, 0.2);
+            transition: all 0.2s;
+        }
+
+        button:active {
+            background: #00ff66;
+            color: #000;
+        }
+
+        /* Efecto CRT */
+        .scanline {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+            background-size: 100% 4px;
+            pointer-events: none;
+            opacity: 0.6;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="terminal">
+        <div class="scanline"></div>
+
+        <!-- Texto de la historia -->
+        <div id="story-box">
+            Presiona "Comenzar" para iniciar la travesía...
+        </div>
+
+        <!-- Render de la animación ASCII -->
+        <div id="scene"></div>
+
+        <!-- Botones -->
+        <div id="controls">
+            <button id="btn-action">Comenzar</button>
+        </div>
+    </div>
+
+    <script>
+        const storyBox = document.getElementById('story-box');
+        const scene = document.getElementById('scene');
+        const btnAction = document.getElementById('btn-action');
+
+        // Textos de la historia
+        const storySteps = [
+            "En dos lugares apartados, dos corazones laten al mismo ritmo...",
+            "La distancia pesa, pero el deseo de verse es más fuerte que cualquier obstáculo.",
+            "Deciden salir de sus casas al mismo tiempo. Cada paso los acerca más.",
+            "El camino se acorta. Pueden sentir la presencia del otro a lo lejos...",
+            "A solo unos pasos... Sus miradas se cruzan y el mundo a su alrededor se detiene.",
+            "¡Por fin se encuentran! Se envuelven en un cálido y eterno abrazo. ❤️"
+        ];
+
+        const pathLength = 16;
+        let step = 0;
+        let isRunning = false;
+
+        const houseLeft = [
+            " /\\ ",
+            "/  \\",
+            "|田|"
+        ];
+
+        const houseRight = [
+            " /\\ ",
+            "/  \\",
+            "|田|"
+        ];
+
+        const hugArt = `
+       <span class="glow">♥  LOVE_FOUND  ♥</span>
+       
+         \\  O/\\O  /
+          \\ (  ) /
+           /  \\
+          /    \\
+        <span class="glow">¡TE AMO DENNY!</span>
+        `;
+
+        function renderScene(posA, posB, isHug = false) {
+            if (isHug) {
+                scene.innerHTML = hugArt;
+                return;
+            }
+
+            let pathLine1 = "";
+            let pathLine2 = "";
+            let pathLine3 = "";
+
+            for (let i = 0; i < pathLength; i++) {
+                if (i === posA) {
+                    pathLine1 += " O ";
+                    pathLine2 += "/|\\";
+                    pathLine3 += "/ \\";
+                } else if (i === posB) {
+                    pathLine1 += " O ";
+                    pathLine2 += "/|\\";
+                    pathLine3 += "/ \\";
+                } else {
+                    pathLine1 += "   ";
+                    pathLine2 += "   ";
+                    pathLine3 += "___";
+                }
+            }
+
+            let frame = "";
+            frame += houseLeft[0] + " ".repeat(pathLength * 3) + houseRight[0] + "\n";
+            frame += houseLeft[1] + " ".repeat(pathLength * 3) + houseRight[1] + "\n";
+            frame += houseLeft[2] + " ".repeat(pathLength * 3) + houseRight[2] + "\n";
+            frame += "   " + pathLine1 + "   \n";
+            frame += "   " + pathLine2 + "   \n";
+            frame += "===" + pathLine3 + "===";
+
+            scene.innerHTML = frame;
+        }
+
+        function updateProgress() {
+            storyBox.textContent = storySteps[step];
+
+            if (step === 0) {
+                renderScene(0, pathLength - 1);
+            } else if (step === 1) {
+                renderScene(1, pathLength - 2);
+            } else if (step === 2) {
+                renderScene(3, pathLength - 4);
+            } else if (step === 3) {
+                renderScene(5, pathLength - 6);
+            } else if (step === 4) {
+                renderScene(7, pathLength - 8);
+            } else if (step === 5) {
+                renderScene(0, 0, true);
+            }
+        }
+
+        btnAction.addEventListener('click', () => {
+            if (!isRunning) {
+                isRunning = true;
+                btnAction.style.display = 'none';
+                
+                // Transición más lenta: 5.5 segundos por paso
+                let timer = setInterval(() => {
+                    updateProgress();
+                    step++;
+                    if (step >= storySteps.length) {
+                        clearInterval(timer);
+                        btnAction.textContent = "Repetir Historia";
+                        btnAction.style.display = 'block';
+                        isRunning = false;
+                        step = 0;
+                    }
+                }, 5500);
+            }
+        });
+
+        renderScene(0, pathLength - 1);
+    </script>
+</body>
+</html>
